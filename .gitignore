@@ -1,0 +1,15 @@
+# ANSYS APDL scratch / result files
+*.rth
+*.rst
+*.db
+*.dbb
+*.esav
+*.emat
+*.full
+*.page
+*.osav
+*.stat
+*.err
+*.log
+*.lock
+*.lis
