@@ -56,7 +56,7 @@ int main(int argc, char* argv[]) {
   const double marginfact = 0.03; // Fraction (30%) to extend the margin of plots
 
   constexpr double ingridThick      = 0.0010;
-  constexpr double cuAnodeClearance = 0.005;
+  constexpr double cuAnodeClearance = 0.09;
   constexpr double cuAnodeThick     = 0.05;
   constexpr double driftgap         = 1.0;
   constexpr double tiCathodeThick   = 0.10;
@@ -110,52 +110,52 @@ int main(int argc, char* argv[]) {
   // ====================================================================
   // Electric Field Visualization for the JATIS paper
   // ====================================================================
-  // if (plotField) {
-  //   TCanvas* cf = new TCanvas("cf", "Drift-field visualizer", 700, 600);
-  //   cf->SetLeftMargin(0.16);
-  //   cf->SetRightMargin(0.15);   // room for the colour bar
-  //   cf->SetTopMargin(0.09);   // room above the plot for the label
+  if (plotField) {
+    TCanvas* cf = new TCanvas("cf", "Drift-field visualizer", 700, 600);
+    cf->SetLeftMargin(0.16);
+    cf->SetRightMargin(0.15);   // room for the colour bar
+    cf->SetTopMargin(0.09);   // room above the plot for the label
 
-  //   // One common area for all layers (x-z plane)
-  //   const double xMin = -rMax, xMax = rMax;
-  //   const double zMin = h1 - 0.01, zMax = h6 + 0.01;
+    // One common area for all layers (x-z plane)
+    const double xMin = -rMax, xMax = rMax;
+    const double zMin = h1 - 0.01, zMax = h6 + 0.01;
 
-  //   // Potential map
-  //   fieldView.SetCanvas(cf);
-  //   fieldView.SetPlane(0, -1, 0, 0, 0, 0);
-  //   // fieldView.SetArea(xMin, zMin, xMax, zMax);
-  //   fieldView.SetArea(-1.4, zMin, 1.4, zMax);
-  //   fieldView.SetVoltageRange(-1600., 0.);
-  //   fieldView.PlotContour("v");
+    // Potential map
+    fieldView.SetCanvas(cf);
+    fieldView.SetPlane(0, -1, 0, 0, 0, 0);
+    // fieldView.SetArea(xMin, zMin, xMax, zMax);
+    fieldView.SetArea(-1.4, zMin, 1.4, zMax);
+    fieldView.SetVoltageRange(-1600., 0.);
+    fieldView.PlotContour("v");
 
-  //   // Electrodes only (don't fill the gas, or it hides the contour)
-  //   meshView.SetCanvas(cf);
-  //   meshView.SetPlane(0, -1, 0, 0, 0, 0);
-  //   // meshView.SetArea(xMin, zMin, xMax, zMax);
-  //   meshView.SetArea(-1.4, zMin, 1.4, zMax);
-  //   meshView.SetFillMesh(true);
-  //   meshView.SetColor(0, kGray + 1);   // check index with PrintMaterials()
-  //   meshView.DisableMaterial(1);       // gas: not drawn
-  //   meshView.Plot(true);
+    // Electrodes only (don't fill the gas, or it hides the contour)
+    meshView.SetCanvas(cf);
+    meshView.SetPlane(0, -1, 0, 0, 0, 0);
+    // meshView.SetArea(xMin, zMin, xMax, zMax);
+    meshView.SetArea(-1.4, zMin, 1.4, zMax);
+    meshView.SetFillMesh(true);
+    meshView.SetColor(0, kGray + 1);   // check index with PrintMaterials()
+    meshView.DisableMaterial(1);       // gas: not drawn
+    meshView.Plot(true);
 
-  //   // Field lines, starting just below the cathode
-  //   std::vector<double> xf, yf, zf;
-  //   const double zStart = h5 - 0.001;  // 10 um below the cathode
-  //   const double xEdge  = 0.5 * diaAnodeCathode - 0.01;
-  //   fieldView.EqualFluxIntervals(-xEdge, 0., zStart, xEdge, 0., zStart,
-  //                                xf, yf, zf, 40);
-  //   fieldView.PlotFieldLines(xf, yf, zf, true, false, kBlack);
+    // Field lines, starting just below the cathode
+    std::vector<double> xf, yf, zf;
+    const double zStart = h5 - 0.001;  // 10 um below the cathode
+    const double xEdge  = 0.5 * diaAnodeCathode - 0.01;
+    fieldView.EqualFluxIntervals(-xEdge, 0., zStart, xEdge, 0., zStart,
+                                 xf, yf, zf, 40);
+    fieldView.PlotFieldLines(xf, yf, zf, true, false, kBlack);
 
-  //   // Colour-bar label
-  //   TLatex label;
-  //   label.SetNDC();            // coordinates as fractions of the canvas
-  //   label.SetTextAlign(22);    // centred
-  //   label.SetTextSize(0.035);
-  //   label.DrawLatex(0.88, 0.955, "Potential (V)");
+    // Colour-bar label
+    TLatex label;
+    label.SetNDC();            // coordinates as fractions of the canvas
+    label.SetTextAlign(22);    // centred
+    label.SetTextSize(0.035);
+    label.DrawLatex(0.88, 0.955, "Potential (V)");
 
-  //   cf->Update();
-  //   cf->SaveAs("driftfield.pdf");
-  // }
+    cf->Update();
+    cf->SaveAs("driftfield.pdf");
+  }
 
   app.Run();
   exit(0);

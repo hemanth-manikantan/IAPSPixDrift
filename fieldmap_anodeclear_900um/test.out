@@ -1,0 +1,889 @@
+
+ Ansys Mechanical Enterprise Academic Research     
+
+
+ *------------------------------------------------------------------*
+ |                                                                  |
+ |   W E L C O M E   T O   T H E   A N S Y S (R)  P R O G R A M     |
+ |                                                                  |
+ *------------------------------------------------------------------*
+
+
+
+
+ ***************************************************************
+ *         ANSYS MAPDL 2022 R2          LEGAL NOTICES          *
+ ***************************************************************
+ *                                                             *
+ * Copyright 1971-2022 Ansys, Inc.  All rights reserved.       *
+ * Unauthorized use, distribution or duplication is            *
+ * prohibited.                                                 *
+ *                                                             *
+ * Ansys is a registered trademark of Ansys, Inc. or its       *
+ * subsidiaries in the United States or other countries.       *
+ * See the Ansys, Inc. online documentation or the Ansys, Inc. *
+ * documentation CD or online help for the complete Legal      *
+ * Notice.                                                     *
+ *                                                             *
+ ***************************************************************
+ *                                                             *
+ * THIS ANSYS SOFTWARE PRODUCT AND PROGRAM DOCUMENTATION       *
+ * INCLUDE TRADE SECRETS AND CONFIDENTIAL AND PROPRIETARY      *
+ * PRODUCTS OF ANSYS, INC., ITS SUBSIDIARIES, OR LICENSORS.    *
+ * The software products and documentation are furnished by    *
+ * Ansys, Inc. or its subsidiaries under a software license    *
+ * agreement that contains provisions concerning               *
+ * non-disclosure, copying, length and nature of use,          *
+ * compliance with exporting laws, warranties, disclaimers,    *
+ * limitations of liability, and remedies, and other           *
+ * provisions.  The software products and documentation may be *
+ * used, disclosed, transferred, or copied only in accordance  *
+ * with the terms and conditions of that software license      *
+ * agreement.                                                  *
+ *                                                             *
+ * Ansys, Inc. is a UL registered                              *
+ * ISO 9001:2015 company.                                      *
+ *                                                             *
+ ***************************************************************
+ *                                                             *
+ * This product is subject to U.S. laws governing export and   *
+ * re-export.                                                  *
+ *                                                             *
+ * For U.S. Government users, except as specifically granted   *
+ * by the Ansys, Inc. software license agreement, the use,     *
+ * duplication, or disclosure by the United States Government  *
+ * is subject to restrictions stated in the Ansys, Inc.        *
+ * software license agreement and FAR 12.212 (for non-DOD      *
+ * licenses).                                                  *
+ *                                                             *
+ ***************************************************************
+
+ 2022 R2 
+     
+ Point Releases and Patches installed:   
+     
+ Ansys, Inc. License Manager 2022 R2 
+ Ansys, Inc. Products 2022 R2
+ Autodyn 2022 R2 
+ LS-DYNA 2022 R2 
+ CFX (includes CFD-Post) 2022 R2 
+ Chemkin 2022 R2 
+ EnSight 2022 R2 
+ FENSAP-ICE 2022 R2  
+ Fluent (includes CFD-Post) 2022 R2  
+ Polyflow (includes CFD-Post) 2022 R2
+ Forte (includes EnSight) 2022 R2
+ TurboGrid 2022 R2   
+ ICEM CFD 2022 R2
+ Aqwa 2022 R2
+ Speos HPC 2022 R2   
+ Customization Files for User Programmable Features 2022 R2  
+ Mechanical Products 2022 R2 
+ Icepak (includes CFD-Post) 2022 R2  
+ Remote Solve Manager Standalone Services 2022 R2
+ ACIS Geometry Interface 2022 R2 
+ Catia, Version 5 Geometry Interface 2022 R2 
+ Parasolid Geometry Interface 2022 R2
+
+
+          *****  MAPDL COMMAND LINE ARGUMENTS  *****
+  BATCH MODE REQUESTED (-b)    = LIST
+  INPUT FILE COPY MODE (-c)    = COPY
+       1 PARALLEL PROCESSES REQUESTED WITH SINGLE THREAD PER PROCESS
+    TOTAL OF     1 CORES REQUESTED
+  INPUT FILE NAME              = /home/admhemmant/Analysis/GridPix/Simulations/IAPSPixDrift/fieldmap_anodeclear_900um/IAPSPix-DriftField.inp
+  OUTPUT FILE NAME             = /home/admhemmant/Analysis/GridPix/Simulations/IAPSPixDrift/fieldmap_anodeclear_900um/test.out
+  INITIAL DIRECTORY = /home/admhemmant/Analysis/GridPix/Simulations/IAPSPixDrift/fieldmap_anodeclear_900um
+
+ RELEASE= 2022 R2              BUILD= 22.2      UP20220516   VERSION=LINUX x64   
+ CURRENT JOBNAME=file  12:37:22  NOV 07, 2026 CP=      0.269
+
+     1  FINISH  
+     2  /CLEAR, START   
+     3  /PREP7  
+     4      
+     5  KEYW, PR_ELMAG, 1   
+     6  KEYW, MAGELC, 1 
+     7      
+     8  ET, 1, SOLID123 
+     9      
+    10  ! Everything in mm (no unit in realty)  
+    11  ingridThick = 0.010 ! Solid Ingrid without holes thickness  
+    12  ingridSide = 14.0 ! Ingrid l and w (square) 
+    13  cuAnodeClearance = 0.9 ! 900 um clearence between Ingrid and Anode  
+    14  cuAnodeThick = 0.5 ! Cu Anode thickness 
+    15  cuAnodeDrillSide = 13.0 ! Square drill bit  
+    16  driftgap = 10.0 ! Cathode placement from Grid   
+    17  tiCathodeThick  = 1.0 ! Ti Cathode thickness
+    18  diaAnodeCathode = 28.0 ! Anode and Cathode diameter 
+    19      
+    20  ! Placement distances along z   
+    21  h1 = 0.0
+    22  h2 = ingridThick
+    23  h3 = ingridThick + cuAnodeClearance 
+    24  h4 = ingridThick + cuAnodeClearance + cuAnodeThick  
+    25  h5 = ingridThick + cuAnodeClearance + cuAnodeThick + driftgap   
+    26  h6 = ingridThick + cuAnodeClearance + cuAnodeThick + driftgap + tiCathodeThick  
+    27      
+    28  ! Make cylinder volume for Gas volume surrounding and including Ingrid plus clearence until Anode   
+    29  WPOFFS, 0, 0, h1  ! Zero offset along z 
+    30  CYL4, 0, 0, diaAnodeCathode/2, 0., , 360., h3 ! Vol 1 InGrid plus Anode Clearance   
+    31  WPOFFS, 0, 0, -h1  ! Revert offset along z  
+    32      
+    33  ! Make volume block for ingrid (also drillbit for gas subtraction)  
+    34  ! (x1,x2,y1,y2,z1,z2)   
+    35  BLOCK, -ingridSide/2, ingridSide/2, -ingridSide/2, ingridSide/2, h1, h2 ! Vol 2 InGrid  
+    36      
+    37  ! Make cylinder volume for Copper Anode Base
+    38  WPOFFS, 0, 0, h3  ! Offset along z  
+    39  CYL4, 0, 0, diaAnodeCathode/2, 0., , 360., cuAnodeThick ! Vol 3 Copper Anode base   
+    40  WPOFFS, 0, 0, -h3  ! Revert offset along z  
+    41      
+    42  ! Drill bit to subtract from Copper Anode Base (This is also gas gap)   
+    43  ! (x1,x2,y1,y2,z1,z2)   
+    44  BLOCK, -cuAnodeDrillSide/2, cuAnodeDrillSide/2, -cuAnodeDrillSide/2, cuAnodeDrillSide/2, h3, h4 ! Vol 4 Anode Drill bit (gas gap)   
+    45      
+    46  ! Make cylinder volume for Drift gap
+    47  WPOFFS, 0, 0, h4  ! Offset along z  
+    48  CYL4, 0, 0, diaAnodeCathode/2, 0., , 360., driftgap ! Vol 5 Drift Gap   
+    49  WPOFFS, 0, 0, -h4  ! Revert offset along z  
+    50      
+    51  ! Make cylinder volume for Titanium Cathode 
+    52  WPOFFS, 0, 0, h5  ! Offset along z  
+    53  CYL4, 0, 0, diaAnodeCathode/2, 0., , 360., tiCathodeThick ! Vol 6 Titanium Cathode  
+    54  WPOFFS, 0, 0, -h5  ! Revert offset along z  
+    55      
+    56  ! Subtract Ingrid Drill bit from base gas vol   
+    57  VSBV, 1, 2, , ,KEEP !! Subtract from Vol 1, Vol 2. Free Vol 1 and keep Vol 2. Result saved to Vol 7.
+    58      
+    59  ! Subtract Drill bit from Copper Anode Base 
+    60  VSBV, 3, 4, , ,KEEP !! Subtract from Vol 3, Vol 4. Free Vol 3 and keep Vol 4. Result (Anode) saved to Vol 1.
+    61      
+    62  ! ! ! Assign colors to all component volumes
+    63  ! /COLOR, VOLU, BLUE, 2 ! InGrid
+    64  ! /COLOR, VOLU, ORANGE, 7 ! Gas around Ingrid until Copper Anode
+    65  ! /COLOR, VOLU, RED, 1 ! Copper Anode   
+    66  ! /COLOR, VOLU, ORANGE, 4 ! Gas gap in Copper Anode 
+    67  ! /COLOR, VOLU, ORANGE, 5 ! Drift gas gap   
+    68  ! /COLOR, VOLU, BLUE, 6 ! Cathode   
+    69      
+    70  ! ! ! ! Geometry looks good, so glue them   
+    71  VGLUE, ALL !! Gluing will change the volume numbers, check the new volumes assigned with VSEL   
+    72  ! ! ! ! ! Out : 1 2 4 5 6 7 to 1 2 3 4 8 9  
+    73      
+    74  ! ! ! Run the following with each new vol ID to find out what Volume ID Ansys assigned: 
+    75  ! VSEL, S,,, 8  
+    76  ! VPLOT 
+    77      
+    78      
+    79  /COLOR, VOLU, BLUE, 2 ! InGrid  
+    80  /COLOR, VOLU, ORANGE, 9 ! Gas around Ingrid until Copper Anode  
+    81  /COLOR, VOLU, RED, 1 ! Copper Anode 
+    82  /COLOR, VOLU, ORANGE, 4 ! Gas gap in Copper Anode   
+    83  /COLOR, VOLU, BLUE, 3 ! Cathode 
+    84  /COLOR, VOLU, ORANGE, 8 ! Drift gas gap 
+    85      
+    86  ! ! For conductors use permitivity and resitivity, for insulators only permitivity  
+    87  MP, PERX, 1, 1.0E5 ! 1. Aluminum
+    88  MP, RSVX, 1, 0.0 ! 1. Aluminum resistivity  
+    89  MP, PERX, 2, 1.0 ! 2. Gas Mixture (Drift / Holes)   
+    90  MP, PERX, 3, 1.0E5 ! 3. Beryllium (Cathode) 
+    91  MP, RSVX, 3, 0.0 ! 3. Beryllium resistivity 
+    92      
+    93  ! ! Assign material properties  
+    94  VSEL, S,,, 2 ! Select vol 2 InGrid  
+    95  VATT, 1,, 1 ! Assign to vol 2 material 1
+    96  VSEL, S,,, 9 ! Select vol 9 Gas around Ingrid until Copper Anode
+    97  VATT, 2,, 1 ! Assign to vol 9 material 2
+    98  VSEL, S,,, 4 ! Select vol 4 Gas gap in Copper Anode 
+    99  VATT, 2,, 1 ! Assign to vol 4 material 2
+   100  VSEL, S,,, 8 ! Select vol 8 Drift gas gap   
+   101  VATT, 2,, 1 ! Assign to vol 8 Drift gas gap 
+   102  VSEL, S,,, 1 ! Select vol 1 Copper Anode
+   103  VATT, 1,, 1 ! Assign to vol 1 material 1
+   104  VSEL, S,,, 3 ! Select vol 3 Cathode 
+   105  VATT, 1,, 1 ! Assign to vol 3 material 1
+   106      
+   107      
+   108  ALLSEL  
+   109  VPLOT   
+   110      
+   111  ! ! !--Boundary Conditions----  
+   112  voltage_cathode = -1580 
+   113  voltage_anode = -580
+   114  voltage_chip = -430 
+   115      
+   116  ! ! Apply zero volt to the InGrid   
+   117  VSEL, S,,, 2 ! Select the volume of InGrid  
+   118  ASLV, S ! Select all alreas contained in the previously selected Volume 2   
+   119  DA, ALL, VOLT, voltage_chip ! Apply voltage to the grid 
+   120      
+   121  ! ! Apply negative few hundres volts to the Copper Anode
+   122  VSEL, S,,, 1 ! Select the volume of Copper Anode
+   123  ASLV, S ! Select all alreas contained in the previously selected Volume 1   
+   124  DA, ALL, VOLT, voltage_anode ! Apply voltage to the Copper Anode
+   125      
+   126  ! ! Voltage to the Beryllium window 
+   127  VSEL, S,,, 3 ! Select the volume of Beryllium window
+   128  ASLV, S ! Select all alreas contained in the previously selected Volume 3   
+   129  DA, ALL, VOLT, voltage_cathode ! Apply voltage to the Beryllium window  
+   130      
+   131  ! !Meshing options  
+   132  VSEL, S,,,1,9 ! Select all volumes from 1-9 
+   133  ASLV, S ! Select all surface areas contained in the selected volume 
+   134      
+   135  MSHKEY, 0 ! Select free meshing 
+   136  SMRT, 10 ! Meshing element size Fine = 1, Coarse = 10   
+   137  VSEL, S,,,1 ! Select Vol 1! S = select new set (default)
+   138  VSEL, A,,,2 ! Select Vol 2 ! A = additionally select and extend current 
+   139  VSEL, A,,,3 ! Select Vol 3  
+   140  VSEL, A,,,4 ! Select Vol 4  
+   141  VSEL, A,,,8 ! Select Vol 9  
+   142  VSEL, A,,,9 ! Select Vol 9  
+   143  VMESH,ALL   
+   144      
+   145  ! Solve the field   
+   146  /SOLU   
+   147  SOLVE   
+   148  FINISH  
+   149      
+   150  !Display the Solution for Electric Field
+   151  !Comment this to run weighting potential
+   152  /POST1  
+   153  /EFACET, 1  
+   154  PLNSOL, VOLT,, 0
+   155      
+   156  ! Write the Field solution to files 
+   157  ! EM solution Potentials
+   158  /OUTPUT, PRNSOL, lis
+   159  PRNSOL, VOLT
+   160  /OUTPUT 
+   161  ! Nodes 
+   162  /OUTPUT, NLIST, lis 
+   163  NLIST   
+   164  /OUTPUT 
+   165      
+   166  ! Element list  
+   167  /OUTPUT, ELIST, lis 
+   168  ELIST   
+   169  /OUTPUT 
+   170      
+   171  ! Material list 
+   172  /OUTPUT, MPLIST, lis
+   173  MPLIST  
+   174  /OUTPUT 
+
+ RUN SETUP PROCEDURE FROM FILE= /home/admhemmant/Softwares/Ansys2022R2/ansys_inc/v222/ansys/apdl/start.ans
+
+ /INPUT FILE= /home/admhemmant/Softwares/Ansys2022R2/ansys_inc/v222/ansys/apdl/start.ans  LINE=       0
+
+ CLEAR DATABASE AND RERUN START.ANS
+
+ RUN SETUP PROCEDURE FROM FILE= /home/admhemmant/Softwares/Ansys2022R2/ansys_inc/v222/ansys/apdl/start.ans
+
+ Ansys Mechanical Enterprise Academic Research     
+
+ /INPUT FILE= /home/admhemmant/Softwares/Ansys2022R2/ansys_inc/v222/ansys/apdl/start.ans  LINE=       0
+
+ *** MAPDL - ENGINEERING ANALYSIS SYSTEM  RELEASE 2022 R2          22.2     ***
+ Ansys Mechanical Enterprise Academic Research     
+ 00000000  VERSION=LINUX x64     12:37:23  NOV 07, 2026 CP=      0.334
+
+                                                                               
+
+
+
+          ***** MAPDL ANALYSIS DEFINITION (PREP7) *****
+
+ SET KEYWORDS
+   PR_ELMAG =     1
+
+ SET KEYWORDS
+   MAGELC   =     1
+
+ ELEMENT TYPE          1 IS SOLID123     3-D 10-NODE ELECTROST SOLID 
+  KEYOPT( 1- 6)=        0      0      0        0      0      0
+  KEYOPT( 7-12)=        0      0      0        0      0      0
+  KEYOPT(13-18)=        0      0      0        0      0      0
+
+ CURRENT NODAL DOF SET IS  VOLT
+  THREE-DIMENSIONAL MODEL
+
+ PARAMETER INGRIDTHICK =    0.1000000000E-01
+
+ PARAMETER INGRIDSIDE =     14.00000000    
+
+ PARAMETER CUANODECLEARANCE =    0.9000000000    
+
+ PARAMETER CUANODETHICK =    0.5000000000    
+
+ PARAMETER CUANODEDRILLSIDE =     13.00000000    
+
+ PARAMETER DRIFTGAP =     10.00000000    
+
+ PARAMETER TICATHODETHICK =     1.000000000    
+
+ PARAMETER DIAANODECATHODE =     28.00000000    
+
+ PARAMETER H1 =     0.000000000    
+
+ PARAMETER H2 =    0.1000000000E-01
+
+ PARAMETER H3 =    0.9100000000    
+
+ PARAMETER H4 =     1.410000000    
+
+ PARAMETER H5 =     11.41000000    
+
+ PARAMETER H6 =     12.41000000    
+
+ MOVE WORKING PLANE'S FOCUS POINT 
+      0.0000     UNITS ALONG THE WORKING PLANE'S X-AXIS
+      0.0000     UNITS ALONG THE WORKING PLANE'S Y-AXIS
+      0.0000     UNITS ALONG THE WORKING PLANE'S Z-AXIS
+
+ CREATE A CYLINDRICAL VOLUME WITH
+ INNER RADIUS         =      0.000000000    
+ OUTER RADIUS         =      14.00000000    
+ STARTING THETA ANGLE =      0.000000000    
+ ENDING   THETA ANGLE =      360.0000000    
+ END Z-DISTANCES FROM        0.000000000     TO     0.9100000000    
+
+      OUTPUT VOLUME =     1
+
+ MOVE WORKING PLANE'S FOCUS POINT 
+      0.0000     UNITS ALONG THE WORKING PLANE'S X-AXIS
+      0.0000     UNITS ALONG THE WORKING PLANE'S Y-AXIS
+      0.0000     UNITS ALONG THE WORKING PLANE'S Z-AXIS
+
+ CREATE A HEXAHEDRAL VOLUME WITH
+ X-DISTANCES FROM     -7.000000000     TO      7.000000000    
+ Y-DISTANCES FROM     -7.000000000     TO      7.000000000    
+ Z-DISTANCES FROM      0.000000000     TO     0.1000000000E-01
+
+      OUTPUT VOLUME =     2
+
+ MOVE WORKING PLANE'S FOCUS POINT 
+      0.0000     UNITS ALONG THE WORKING PLANE'S X-AXIS
+      0.0000     UNITS ALONG THE WORKING PLANE'S Y-AXIS
+     0.91000     UNITS ALONG THE WORKING PLANE'S Z-AXIS
+
+ CREATE A CYLINDRICAL VOLUME WITH
+ INNER RADIUS         =      0.000000000    
+ OUTER RADIUS         =      14.00000000    
+ STARTING THETA ANGLE =      0.000000000    
+ ENDING   THETA ANGLE =      360.0000000    
+ END Z-DISTANCES FROM        0.000000000     TO     0.5000000000    
+
+      OUTPUT VOLUME =     3
+
+ MOVE WORKING PLANE'S FOCUS POINT 
+      0.0000     UNITS ALONG THE WORKING PLANE'S X-AXIS
+      0.0000     UNITS ALONG THE WORKING PLANE'S Y-AXIS
+    -0.91000     UNITS ALONG THE WORKING PLANE'S Z-AXIS
+
+ CREATE A HEXAHEDRAL VOLUME WITH
+ X-DISTANCES FROM     -6.500000000     TO      6.500000000    
+ Y-DISTANCES FROM     -6.500000000     TO      6.500000000    
+ Z-DISTANCES FROM     0.9100000000     TO      1.410000000    
+
+      OUTPUT VOLUME =     4
+
+ MOVE WORKING PLANE'S FOCUS POINT 
+      0.0000     UNITS ALONG THE WORKING PLANE'S X-AXIS
+      0.0000     UNITS ALONG THE WORKING PLANE'S Y-AXIS
+      1.4100     UNITS ALONG THE WORKING PLANE'S Z-AXIS
+
+ CREATE A CYLINDRICAL VOLUME WITH
+ INNER RADIUS         =      0.000000000    
+ OUTER RADIUS         =      14.00000000    
+ STARTING THETA ANGLE =      0.000000000    
+ ENDING   THETA ANGLE =      360.0000000    
+ END Z-DISTANCES FROM        0.000000000     TO      10.00000000    
+
+      OUTPUT VOLUME =     5
+
+ MOVE WORKING PLANE'S FOCUS POINT 
+      0.0000     UNITS ALONG THE WORKING PLANE'S X-AXIS
+      0.0000     UNITS ALONG THE WORKING PLANE'S Y-AXIS
+     -1.4100     UNITS ALONG THE WORKING PLANE'S Z-AXIS
+
+ MOVE WORKING PLANE'S FOCUS POINT 
+      0.0000     UNITS ALONG THE WORKING PLANE'S X-AXIS
+      0.0000     UNITS ALONG THE WORKING PLANE'S Y-AXIS
+      11.410     UNITS ALONG THE WORKING PLANE'S Z-AXIS
+
+ CREATE A CYLINDRICAL VOLUME WITH
+ INNER RADIUS         =      0.000000000    
+ OUTER RADIUS         =      14.00000000    
+ STARTING THETA ANGLE =      0.000000000    
+ ENDING   THETA ANGLE =      360.0000000    
+ END Z-DISTANCES FROM        0.000000000     TO      1.000000000    
+
+      OUTPUT VOLUME =     6
+
+ MOVE WORKING PLANE'S FOCUS POINT 
+      0.0000     UNITS ALONG THE WORKING PLANE'S X-AXIS
+      0.0000     UNITS ALONG THE WORKING PLANE'S Y-AXIS
+     -11.410     UNITS ALONG THE WORKING PLANE'S Z-AXIS
+
+ SUBTRACT VOLUMES
+
+      VOLUME NUMBERS TO BE OPERATED ON =       1
+      VOLUMES OPERATED ON WILL BE DELETED IF POSSIBLE
+      VOLUME NUMBERS TO BE SUBTRACTED  =       2
+      OUTPUT VOLUMES =     7
+
+ SUBTRACT VOLUMES
+
+      VOLUME NUMBERS TO BE OPERATED ON =       3
+      VOLUMES OPERATED ON WILL BE DELETED IF POSSIBLE
+      VOLUME NUMBERS TO BE SUBTRACTED  =       4
+      OUTPUT VOLUMES =     1
+
+ GLUE VOLUMES
+      INPUT VOLUMES =     1    2    4    5    6    7
+      INPUT VOLUMES WILL BE DELETED IF POSSIBLE
+      OUTPUT VOLUMES =     1    2    3    4    8    9
+ VOLU 2 COLOR SET TO BLUE                             
+ VOLU 9 COLOR SET TO ORANGE                           
+ VOLU 1 COLOR SET TO RED                              
+ VOLU 4 COLOR SET TO ORANGE                           
+ VOLU 3 COLOR SET TO BLUE                             
+ VOLU 8 COLOR SET TO ORANGE                           
+
+ MATERIAL          1     PERX =   100000.0      
+
+ MATERIAL          1     RSVX =   0.000000      
+
+ MATERIAL          2     PERX =   1.000000      
+
+ MATERIAL          3     PERX =   100000.0      
+
+ MATERIAL          3     RSVX =   0.000000      
+
+ SELECT       FOR ITEM=VOLU COMPONENT=    
+  IN RANGE         2 TO          2 STEP          1
+
+        1  VOLUMES (OF        6  DEFINED) SELECTED BY  VSEL  COMMAND.
+
+ SET ATTRIBUTES FOR ALL SELECTED VOLUMES
+      MAT =    1   REAL =       0   TYPE =    1   ESYS =    0   SECT =    0
+
+ ATTRIBUTES SET FOR      1 VOLUMES (OUT OF      1 SELECTED)
+
+ SELECT       FOR ITEM=VOLU COMPONENT=    
+  IN RANGE         9 TO          9 STEP          1
+
+        1  VOLUMES (OF        6  DEFINED) SELECTED BY  VSEL  COMMAND.
+
+ SET ATTRIBUTES FOR ALL SELECTED VOLUMES
+      MAT =    2   REAL =       0   TYPE =    1   ESYS =    0   SECT =    0
+
+ ATTRIBUTES SET FOR      1 VOLUMES (OUT OF      1 SELECTED)
+
+ SELECT       FOR ITEM=VOLU COMPONENT=    
+  IN RANGE         4 TO          4 STEP          1
+
+        1  VOLUMES (OF        6  DEFINED) SELECTED BY  VSEL  COMMAND.
+
+ SET ATTRIBUTES FOR ALL SELECTED VOLUMES
+      MAT =    2   REAL =       0   TYPE =    1   ESYS =    0   SECT =    0
+
+ ATTRIBUTES SET FOR      1 VOLUMES (OUT OF      1 SELECTED)
+
+ SELECT       FOR ITEM=VOLU COMPONENT=    
+  IN RANGE         8 TO          8 STEP          1
+
+        1  VOLUMES (OF        6  DEFINED) SELECTED BY  VSEL  COMMAND.
+
+ SET ATTRIBUTES FOR ALL SELECTED VOLUMES
+      MAT =    2   REAL =       0   TYPE =    1   ESYS =    0   SECT =    0
+
+ ATTRIBUTES SET FOR      1 VOLUMES (OUT OF      1 SELECTED)
+
+ SELECT       FOR ITEM=VOLU COMPONENT=    
+  IN RANGE         1 TO          1 STEP          1
+
+        1  VOLUMES (OF        6  DEFINED) SELECTED BY  VSEL  COMMAND.
+
+ SET ATTRIBUTES FOR ALL SELECTED VOLUMES
+      MAT =    1   REAL =       0   TYPE =    1   ESYS =    0   SECT =    0
+
+ ATTRIBUTES SET FOR      1 VOLUMES (OUT OF      1 SELECTED)
+
+ SELECT       FOR ITEM=VOLU COMPONENT=    
+  IN RANGE         3 TO          3 STEP          1
+
+        1  VOLUMES (OF        6  DEFINED) SELECTED BY  VSEL  COMMAND.
+
+ SET ATTRIBUTES FOR ALL SELECTED VOLUMES
+      MAT =    1   REAL =       0   TYPE =    1   ESYS =    0   SECT =    0
+
+ ATTRIBUTES SET FOR      1 VOLUMES (OUT OF      1 SELECTED)
+
+ SELECT ALL ENTITIES OF TYPE= ALL  AND BELOW
+
+ *** NOTE *** Display device has not yet been specified with the /SHOW command.  Display commands ignored. 
+
+ PARAMETER VOLTAGE_CATHODE =    -1580.000000    
+
+ PARAMETER VOLTAGE_ANODE =    -580.0000000    
+
+ PARAMETER VOLTAGE_CHIP =    -430.0000000    
+
+ SELECT       FOR ITEM=VOLU COMPONENT=    
+  IN RANGE         2 TO          2 STEP          1
+
+        1  VOLUMES (OF        6  DEFINED) SELECTED BY  VSEL  COMMAND.
+
+ SELECT      ALL AREAS HAVING ANY VOLUMES IN SELECTED VOLUME SET.
+
+        6  AREAS (OF       25  DEFINED) SELECTED FROM 
+        1 SELECTED VOLUMES BY  ASLV  COMMAND.
+
+ CONSTRAINT AT ALL SELECTED AREAS
+      LOAD LABELS = VOLT
+      VALUES =     -430.00         0.0000    
+
+ SELECT       FOR ITEM=VOLU COMPONENT=    
+  IN RANGE         1 TO          1 STEP          1
+
+        1  VOLUMES (OF        6  DEFINED) SELECTED BY  VSEL  COMMAND.
+
+ SELECT      ALL AREAS HAVING ANY VOLUMES IN SELECTED VOLUME SET.
+
+        8  AREAS (OF       25  DEFINED) SELECTED FROM 
+        1 SELECTED VOLUMES BY  ASLV  COMMAND.
+
+ CONSTRAINT AT ALL SELECTED AREAS
+      LOAD LABELS = VOLT
+      VALUES =     -580.00         0.0000    
+
+ SELECT       FOR ITEM=VOLU COMPONENT=    
+  IN RANGE         3 TO          3 STEP          1
+
+        1  VOLUMES (OF        6  DEFINED) SELECTED BY  VSEL  COMMAND.
+
+ SELECT      ALL AREAS HAVING ANY VOLUMES IN SELECTED VOLUME SET.
+
+        4  AREAS (OF       25  DEFINED) SELECTED FROM 
+        1 SELECTED VOLUMES BY  ASLV  COMMAND.
+
+ CONSTRAINT AT ALL SELECTED AREAS
+      LOAD LABELS = VOLT
+      VALUES =     -1580.0         0.0000    
+
+ SELECT       FOR ITEM=VOLU COMPONENT=    
+  IN RANGE         1 TO          9 STEP          1
+
+        6  VOLUMES (OF        6  DEFINED) SELECTED BY  VSEL  COMMAND.
+
+ SELECT      ALL AREAS HAVING ANY VOLUMES IN SELECTED VOLUME SET.
+
+       25  AREAS (OF       25  DEFINED) SELECTED FROM 
+        6 SELECTED VOLUMES BY  ASLV  COMMAND.
+ USE THE FREE MESHER.
+
+ RESET SMART SIZING PARAMETERS
+      SIZE LEVEL                                      =     10
+      SMART SIZING SCALE               FACTOR         =   5.0000    
+      AREA INTERNAL EXPANSION          FACTOR         =   2.0000    
+      AREA INTERNAL TRANSITION CONTROL FACTOR         =   2.0000    
+      SPANNED ANGLE PER ELEMENT (LOW  ORDER ELEMENTS) =     45
+      SPANNED ANGLE PER ELEMENT (HIGH ORDER ELEMENTS) =     45
+      GROWTH RATIO FOR PROXIMITY CHECK                =   2.0000    
+      MAXIMUM NUMBER OF ITERATIONS                    =      4
+      SURFACE PROXIMITY REFINEMENT IS                     OFF 
+      SMALL HOLE COARSENING IS                            ON  
+
+ SELECT       FOR ITEM=VOLU COMPONENT=    
+  IN RANGE         1 TO          1 STEP          1
+
+        1  VOLUMES (OF        6  DEFINED) SELECTED BY  VSEL  COMMAND.
+
+ ALSO SELECT  FOR ITEM=VOLU COMPONENT=    
+  IN RANGE         2 TO          2 STEP          1
+
+        2  VOLUMES (OF        6  DEFINED) SELECTED BY VSEL COMMAND.
+
+ ALSO SELECT  FOR ITEM=VOLU COMPONENT=    
+  IN RANGE         3 TO          3 STEP          1
+
+        3  VOLUMES (OF        6  DEFINED) SELECTED BY VSEL COMMAND.
+
+ ALSO SELECT  FOR ITEM=VOLU COMPONENT=    
+  IN RANGE         4 TO          4 STEP          1
+
+        4  VOLUMES (OF        6  DEFINED) SELECTED BY VSEL COMMAND.
+
+ ALSO SELECT  FOR ITEM=VOLU COMPONENT=    
+  IN RANGE         8 TO          8 STEP          1
+
+        5  VOLUMES (OF        6  DEFINED) SELECTED BY VSEL COMMAND.
+
+ ALSO SELECT  FOR ITEM=VOLU COMPONENT=    
+  IN RANGE         9 TO          9 STEP          1
+
+        6  VOLUMES (OF        6  DEFINED) SELECTED BY VSEL COMMAND.
+
+ GENERATE NODES AND ELEMENTS   IN  ALL  SELECTED VOLUMES  
+
+ *** NOTE ***                            CP =      17.742   TIME= 12:37:40
+ The initial memory allocation (-m) has been exceeded.                   
+  Supplemental memory allocations are being used.                        
+
+ Memory resident data base increased from      1024 MB to      2048 MB.
+
+ NUMBER OF VOLUMES MESHED   =         6
+ MAXIMUM NODE NUMBER        =   2102890
+ MAXIMUM ELEMENT NUMBER     =   1337503
+
+ ------------------------------------------------------------------------------
+            <<<<<<          SHAPE TESTING SUMMARY           >>>>>>
+            <<<<<<       FOR NEW OR MODIFIED ELEMENTS       >>>>>>
+ ------------------------------------------------------------------------------
+                    --------------------------------------
+                    |  Element count   1337503 SOLID123  |
+                    --------------------------------------
+
+  Test                Number tested  Warning count  Error count    Warn+Err %
+  ----                -------------  -------------  -----------    ----------
+  Aspect Ratio            1337503             97             0         0.01 %
+  Maximum Angle           1337503             34             0         0.00 %
+  Jacobian Ratio          1337503              0             0         0.00 %
+
+  Any                     1337503            125             0         0.01 %
+ ------------------------------------------------------------------------------
+
+ *** WARNING ***                         CP =     236.943   TIME= 12:41:19
+ Shape testing revealed that 125 of the 1337503 new or modified elements 
+ violate shape warning limits.  To review test results, please see the   
+ output file or issue the CHECK command.                                 
+
+
+ ***** ROUTINE COMPLETED *****  CP =       236.943
+
+
+
+ *****  MAPDL SOLUTION ROUTINE  *****
+
+ *****  MAPDL SOLVE    COMMAND  *****
+
+ TRANSFER SOLID MODEL BOUNDARY CONDITIONS TO FINITE ELEMENT MODEL
+      CONSTRAINTS    TRANSFERRED FROM AREAS         = ******
+
+ *** NOTE ***                            CP =     241.218   TIME= 12:41:24
+ There is no title defined for this analysis.                            
+
+ *** WARNING ***                         CP =     243.201   TIME= 12:41:26
+ Previous testing revealed that 125 of the 1337503 selected elements     
+ violate shape warning limits.  To review warning messages, please see   
+ the output or error file, or issue the CHECK command.                   
+
+ *** NOTE ***                            CP =     243.201   TIME= 12:41:26
+ The model data was checked and warning messages were found.             
+  Please review output or errors file (                                  
+ /home/admhemmant/Analysis/GridPix/Simulations/IAPSPixDrift/fieldmap_ano 
+ odeclear_900um/file.err ) for these warning messages.                   
+
+ *** MAPDL - ENGINEERING ANALYSIS SYSTEM  RELEASE 2022 R2          22.2     ***
+ Ansys Mechanical Enterprise Academic Research     
+ 00000000  VERSION=LINUX x64     12:41:26  NOV 07, 2026 CP=    243.201
+
+                                                                               
+
+
+
+                       S O L U T I O N   O P T I O N S
+
+   PROBLEM DIMENSIONALITY. . . . . . . . . . . . .3-D                  
+   DEGREES OF FREEDOM. . . . . . VOLT
+   ANALYSIS TYPE . . . . . . . . . . . . . . . . .STATIC (STEADY-STATE)
+   GLOBALLY ASSEMBLED MATRIX . . . . . . . . . . .SYMMETRIC  
+
+ *** NOTE ***                            CP =     243.949   TIME= 12:41:26
+ Present time 0 is less than or equal to the previous time.  Time will   
+ default to 1.                                                           
+
+ *** NOTE ***                            CP =     243.956   TIME= 12:41:26
+ The conditions for direct assembly have been met.  No .emat or .erot    
+ files will be produced.                                                 
+
+                      L O A D   S T E P   O P T I O N S
+
+   LOAD STEP NUMBER. . . . . . . . . . . . . . . .     1
+   TIME AT END OF THE LOAD STEP. . . . . . . . . .  1.0000    
+   NUMBER OF SUBSTEPS. . . . . . . . . . . . . . .     1
+   STEP CHANGE BOUNDARY CONDITIONS . . . . . . . .    NO
+   PRINT OUTPUT CONTROLS . . . . . . . . . . . . .NO PRINTOUT
+   DATABASE OUTPUT CONTROLS. . . . . . . . . . . .ALL DATA WRITTEN
+                                                  FOR THE LAST SUBSTEP
+
+
+
+ Range of element maximum matrix coefficients in global coordinates
+ Maximum = 1.10324486E-05 at element 851489.                             
+ Minimum = 5.592704468E-14 at element 878912.                            
+
+ *** WARNING ***                         CP =     275.237   TIME= 12:41:58
+ Coefficient ratio exceeds 1.0e8 - Check results.                        
+
+   *** ELEMENT MATRIX FORMULATION TIMES
+     TYPE    NUMBER   ENAME      TOTAL CP  AVE CP
+
+        1   1337503  SOLID123     14.727   0.000011
+ Time at end of element matrix formulation CP = 275.237457.              
+
+ SPARSE MATRIX DIRECT SOLVER.
+  Number of equations =      955866,    Maximum wavefront =    315
+  Memory allocated for solver              =  1251.525 MB
+  Memory required for in-core solution     =  1202.855 MB
+  Memory required for out-of-core solution =   390.421 MB
+
+ *** NOTE ***                            CP =     289.559   TIME= 12:42:12
+ The Sparse Matrix Solver is currently running in the in-core memory     
+ mode.  This memory mode uses the most amount of memory in order to      
+ avoid using the hard drive as much as possible, which most often        
+ results in the fastest solution time.  This mode is recommended if      
+ enough physical memory is present to accommodate all of the solver      
+ data.                                                                   
+ Sparse solver maximum pivot= 2.71687894E-05 at node 1712287 VOLT.       
+ Sparse solver minimum pivot= 1.835921793E-13 at node 1723770 VOLT.      
+ Sparse solver minimum pivot in absolute value= 1.835921793E-13 at node  
+ 1723770 VOLT.                                                           
+
+   *** ELEMENT RESULT CALCULATION TIMES
+     TYPE    NUMBER   ENAME      TOTAL CP  AVE CP
+
+        1   1337503  SOLID123     17.161   0.000013
+
+   *** NODAL LOAD CALCULATION TIMES
+     TYPE    NUMBER   ENAME      TOTAL CP  AVE CP
+
+        1   1337503  SOLID123      9.988   0.000007
+ *** LOAD STEP     1   SUBSTEP     1  COMPLETED.    CUM ITER =      1
+ *** TIME =   1.00000         TIME INC =   1.00000      NEW TRIANG MATRIX
+
+
+ *** MAPDL BINARY FILE STATISTICS
+  BUFFER SIZE USED= 16384
+      392.938 MB WRITTEN ON ELEMENT SAVED DATA FILE: file.esav
+      244.250 MB WRITTEN ON ASSEMBLED MATRIX FILE: file.full
+      879.750 MB WRITTEN ON RESULTS FILE: file.rth
+
+ Memory resident data base increased from      2048 MB to      4096 MB.
+
+ FINISH SOLUTION PROCESSING
+
+
+ ***** ROUTINE COMPLETED *****  CP =       334.690
+
+
+
+ *** MAPDL - ENGINEERING ANALYSIS SYSTEM  RELEASE 2022 R2          22.2     ***
+ Ansys Mechanical Enterprise Academic Research     
+ 00000000  VERSION=LINUX x64     12:42:58  NOV 07, 2026 CP=    334.717
+
+                                                                               
+
+
+
+          ***** MAPDL RESULTS INTERPRETATION (POST1) *****
+
+ *** NOTE ***                            CP =     334.719   TIME= 12:42:58
+ Reading results into the database (SET command) will update the current 
+ displacement and force boundary conditions in the database with the     
+ values from the results file for that load set.  Note that any          
+ subsequent solutions will use these values unless action is taken to    
+ either SAVE the current values or not overwrite them (/EXIT,NOSAVE).    
+
+ Element faceting set to 1 facets per edge.
+
+ /OUTPUT FILE= PRNSOL.lis
+
+ /OUTPUT FILE= NLIST.lis
+
+ /OUTPUT FILE= ELIST.lis
+
+ /OUTPUT FILE= MPLIST.lis
+
+ ***** END OF INPUT ENCOUNTERED *****
+
+
+ NUMBER OF WARNING MESSAGES ENCOUNTERED=          3
+ NUMBER OF ERROR   MESSAGES ENCOUNTERED=          0
+
+
+
+ ***** PROBLEM TERMINATED BY INDICATED ERROR(S) OR BY END OF INPUT DATA *****
+
++--------------------- M A P D L   S T A T I S T I C S ------------------------+
+
+Release: 2022 R2            Build: 22.2       Update: UP20220516   Platform: LINUX x64   
+Date Run: 11/07/2026   Time: 12:43     Process ID: 31481
+Operating System: 
+
+Processor Model: Intel(R) Xeon(R) Gold 6430
+
+Compiler: Intel(R) Fortran Compiler Version 19.0.0  (Build: 20190206)
+          Intel(R) C/C++ Compiler Version 19.0.0  (Build: 20190206)
+          Intel(R) Math Kernel Library Version 2020.0.0 Product Build 20191122
+          BLAS Library supplied by Intel(R) MKL
+
+Number of machines requested            :    1
+Total number of cores available         :   10
+Number of physical cores available      :    5
+Number of processes requested           :    1
+Number of threads per process requested :    1
+Total number of cores requested         :    1 (Shared Memory Parallel)                    
+
+GPU Acceleration: Not Requested
+
+Job Name: file
+Input File: /home/admhemmant/Analysis/GridPix/Simulations/IAPSPixDrift/fieldmap_anodeclear_900um/IAPSPix-DriftField.inp
+Working Directory: /home/admhemmant/Softwares/Ansys2022R2/ansys_inc/v222/ansys/bin
+
+Total CPU time for main thread                    :      329.2 seconds
+Total CPU time summed for all threads             :      342.7 seconds
+
+Elapsed time spent obtaining a license            :        1.6 seconds
+Elapsed time spent pre-processing model (/PREP7)  :      236.8 seconds
+Elapsed time spent solution - preprocessing       :       18.1 seconds
+Elapsed time spent computing solution             :       74.9 seconds
+Elapsed time spent solution - postprocessing      :        0.0 seconds
+Elapsed time spent post-processing model (/POST1) :        0.0 seconds
+ 
+Equation solver used                              :            Sparse (symmetric)
+Equation solver computational rate                :       17.2 Gflops
+Equation solver effective I/O rate                :        5.7 GB/sec
+
+Sum of memory used on all processes               :     8880.0 MB
+Sum of memory allocated on all processes          :    12352.0 MB
+Physical memory available                         :         73 GB
+
+Total amount of I/O written to disk               :        1.7 GB
+Total amount of I/O read from disk                :        0.4 GB
+
++------------------ E N D   M A P D L   S T A T I S T I C S -------------------+
+
+
+ *---------------------------------------------------------------------------*
+ |                                                                           |
+ |                               RUN COMPLETED                               |
+ |                                                                           |
+ |---------------------------------------------------------------------------|
+ |                                                                           |
+ |  Ansys MAPDL 2022 R2         Build 22.2         UP20220516    LINUX x64   |
+ |                                                                           |
+ |---------------------------------------------------------------------------|
+ |                                                                           |
+ | Database Requested(-db)  1024 MB    Scratch Memory Requested      1024 MB |
+ | Maximum Database Used    2213 MB    Maximum Scratch Memory Used   6667 MB |
+ |                                                                           |
+ |---------------------------------------------------------------------------|
+ |                                                                           |
+ |        CP Time      (sec) =        342.688       Time  =  12:43:06        |
+ |        Elapsed Time (sec) =        346.000       Date  =  11/07/2026      |
+ |                                                                           |
+ *---------------------------------------------------------------------------*

@@ -1,0 +1,174 @@
+FINISH
+/CLEAR, START
+/PREP7
+
+KEYW, PR_ELMAG, 1
+KEYW, MAGELC, 1
+
+ET, 1, SOLID123
+
+! Everything in mm (no unit in realty)
+ingridThick = 0.010 ! Solid Ingrid without holes thickness
+ingridSide = 14.0 ! Ingrid l and w (square)
+cuAnodeClearance = 0.9 ! 900 um clearence between Ingrid and Anode
+cuAnodeThick = 0.5 ! Cu Anode thickness
+cuAnodeDrillSide = 13.0 ! Square drill bit
+driftgap = 10.0 ! Cathode placement from Grid
+tiCathodeThick  = 1.0 ! Ti Cathode thickness
+diaAnodeCathode = 28.0 ! Anode and Cathode diameter
+
+! Placement distances along z
+h1 = 0.0
+h2 = ingridThick
+h3 = ingridThick + cuAnodeClearance
+h4 = ingridThick + cuAnodeClearance + cuAnodeThick
+h5 = ingridThick + cuAnodeClearance + cuAnodeThick + driftgap
+h6 = ingridThick + cuAnodeClearance + cuAnodeThick + driftgap + tiCathodeThick
+
+! Make cylinder volume for Gas volume surrounding and including Ingrid plus clearence until Anode
+WPOFFS, 0, 0, h1  ! Zero offset along z
+CYL4, 0, 0, diaAnodeCathode/2, 0., , 360., h3 ! Vol 1 InGrid plus Anode Clearance
+WPOFFS, 0, 0, -h1  ! Revert offset along z
+
+! Make volume block for ingrid (also drillbit for gas subtraction)
+! (x1,x2,y1,y2,z1,z2)
+BLOCK, -ingridSide/2, ingridSide/2, -ingridSide/2, ingridSide/2, h1, h2 ! Vol 2 InGrid
+
+! Make cylinder volume for Copper Anode Base
+WPOFFS, 0, 0, h3  ! Offset along z
+CYL4, 0, 0, diaAnodeCathode/2, 0., , 360., cuAnodeThick ! Vol 3 Copper Anode base
+WPOFFS, 0, 0, -h3  ! Revert offset along z
+
+! Drill bit to subtract from Copper Anode Base (This is also gas gap)
+! (x1,x2,y1,y2,z1,z2)
+BLOCK, -cuAnodeDrillSide/2, cuAnodeDrillSide/2, -cuAnodeDrillSide/2, cuAnodeDrillSide/2, h3, h4 ! Vol 4 Anode Drill bit (gas gap)
+
+! Make cylinder volume for Drift gap
+WPOFFS, 0, 0, h4  ! Offset along z
+CYL4, 0, 0, diaAnodeCathode/2, 0., , 360., driftgap ! Vol 5 Drift Gap
+WPOFFS, 0, 0, -h4  ! Revert offset along z
+
+! Make cylinder volume for Titanium Cathode
+WPOFFS, 0, 0, h5  ! Offset along z
+CYL4, 0, 0, diaAnodeCathode/2, 0., , 360., tiCathodeThick ! Vol 6 Titanium Cathode
+WPOFFS, 0, 0, -h5  ! Revert offset along z
+
+! Subtract Ingrid Drill bit from base gas vol
+VSBV, 1, 2, , ,KEEP !! Subtract from Vol 1, Vol 2. Free Vol 1 and keep Vol 2. Result saved to Vol 7.
+
+! Subtract Drill bit from Copper Anode Base
+VSBV, 3, 4, , ,KEEP !! Subtract from Vol 3, Vol 4. Free Vol 3 and keep Vol 4. Result (Anode) saved to Vol 1. 
+
+! ! ! Assign colors to all component volumes
+! /COLOR, VOLU, BLUE, 2 ! InGrid
+! /COLOR, VOLU, ORANGE, 7 ! Gas around Ingrid until Copper Anode
+! /COLOR, VOLU, RED, 1 ! Copper Anode
+! /COLOR, VOLU, ORANGE, 4 ! Gas gap in Copper Anode
+! /COLOR, VOLU, ORANGE, 5 ! Drift gas gap
+! /COLOR, VOLU, BLUE, 6 ! Cathode
+
+! ! ! ! Geometry looks good, so glue them
+VGLUE, ALL !! Gluing will change the volume numbers, check the new volumes assigned with VSEL
+! ! ! ! ! Out : 1 2 4 5 6 7 to 1 2 3 4 8 9
+
+! ! ! Run the following with each new vol ID to find out what Volume ID Ansys assigned:
+! VSEL, S,,, 8
+! VPLOT
+
+
+/COLOR, VOLU, BLUE, 2 ! InGrid
+/COLOR, VOLU, ORANGE, 9 ! Gas around Ingrid until Copper Anode
+/COLOR, VOLU, RED, 1 ! Copper Anode
+/COLOR, VOLU, ORANGE, 4 ! Gas gap in Copper Anode
+/COLOR, VOLU, BLUE, 3 ! Cathode
+/COLOR, VOLU, ORANGE, 8 ! Drift gas gap
+
+! ! For conductors use permitivity and resitivity, for insulators only permitivity
+MP, PERX, 1, 1.0E5 ! 1. Aluminum 
+MP, RSVX, 1, 0.0 ! 1. Aluminum resistivity
+MP, PERX, 2, 1.0 ! 2. Gas Mixture (Drift / Holes)
+MP, PERX, 3, 1.0E5 ! 3. Beryllium (Cathode)
+MP, RSVX, 3, 0.0 ! 3. Beryllium resistivity
+
+! ! Assign material properties
+VSEL, S,,, 2 ! Select vol 2 InGrid
+VATT, 1,, 1 ! Assign to vol 2 material 1
+VSEL, S,,, 9 ! Select vol 9 Gas around Ingrid until Copper Anode
+VATT, 2,, 1 ! Assign to vol 9 material 2
+VSEL, S,,, 4 ! Select vol 4 Gas gap in Copper Anode
+VATT, 2,, 1 ! Assign to vol 4 material 2
+VSEL, S,,, 8 ! Select vol 8 Drift gas gap
+VATT, 2,, 1 ! Assign to vol 8 Drift gas gap
+VSEL, S,,, 1 ! Select vol 1 Copper Anode
+VATT, 1,, 1 ! Assign to vol 1 material 1
+VSEL, S,,, 3 ! Select vol 3 Cathode
+VATT, 1,, 1 ! Assign to vol 3 material 1
+
+
+ALLSEL
+VPLOT
+
+! ! !--Boundary Conditions----
+voltage_cathode = -1580
+voltage_anode = -580
+voltage_chip = -430
+
+! ! Apply zero volt to the InGrid
+VSEL, S,,, 2 ! Select the volume of InGrid
+ASLV, S ! Select all alreas contained in the previously selected Volume 2
+DA, ALL, VOLT, voltage_chip ! Apply voltage to the grid
+
+! ! Apply negative few hundres volts to the Copper Anode
+VSEL, S,,, 1 ! Select the volume of Copper Anode
+ASLV, S ! Select all alreas contained in the previously selected Volume 1
+DA, ALL, VOLT, voltage_anode ! Apply voltage to the Copper Anode
+
+! ! Voltage to the Beryllium window
+VSEL, S,,, 3 ! Select the volume of Beryllium window
+ASLV, S ! Select all alreas contained in the previously selected Volume 3
+DA, ALL, VOLT, voltage_cathode ! Apply voltage to the Beryllium window
+
+! !Meshing options
+VSEL, S,,,1,9 ! Select all volumes from 1-9
+ASLV, S ! Select all surface areas contained in the selected volume
+
+MSHKEY, 0 ! Select free meshing
+SMRT, 10 ! Meshing element size Fine = 1, Coarse = 10
+VSEL, S,,,1 ! Select Vol 1! S = select new set (default)
+VSEL, A,,,2 ! Select Vol 2 ! A = additionally select and extend current
+VSEL, A,,,3 ! Select Vol 3
+VSEL, A,,,4 ! Select Vol 4
+VSEL, A,,,8 ! Select Vol 9
+VSEL, A,,,9 ! Select Vol 9
+VMESH,ALL
+
+! Solve the field
+/SOLU
+SOLVE
+FINISH
+
+!Display the Solution for Electric Field
+!Comment this to run weighting potential
+/POST1
+/EFACET, 1
+PLNSOL, VOLT,, 0
+
+! Write the Field solution to files
+! EM solution Potentials
+/OUTPUT, PRNSOL, lis
+PRNSOL, VOLT
+/OUTPUT
+! Nodes
+/OUTPUT, NLIST, lis
+NLIST
+/OUTPUT
+
+! Element list
+/OUTPUT, ELIST, lis
+ELIST
+/OUTPUT
+
+! Material list
+/OUTPUT, MPLIST, lis
+MPLIST
+/OUTPUT
